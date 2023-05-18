@@ -1,0 +1,22 @@
+{
+  "Version": "2008-10-17",
+  "Statement": [
+    {
+      "Effect": "Allow",
+      "Principal": {
+        "AWS": "${principal_iam_role_arn}"
+      },
+      "Action": [
+        "elasticfilesystem:ClientWrite",
+        "elasticfilesystem:ClientMount",
+	"elasticfilesystem:ClientRootAccess"
+      ],
+      "Resource": "${resource_arn}",
+      "Condition": {
+        "Bool": {
+          "elasticfilesystem:AccessedViaMountTarget": "true"
+        }
+      }
+    }
+  ]
+}

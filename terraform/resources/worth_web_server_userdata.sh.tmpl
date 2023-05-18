@@ -1,0 +1,41 @@
+#cloud-config
+package_upgrade: true
+packages:
+- nfs-utils
+- amazon-efs-utils
+- httpd
+groups:
+- worthweb
+- worthnews
+- worthpeople
+users:
+- default
+- name: alice
+  groups: worthnews
+  ssh_authorized_keys:
+  - ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABAQCbPdz+X6MJ/Ww+KKCRRTs18gp56tyDKMupbzAMR+pjigfMyxZ8/RC45xBMlXnezsgksbH/NuE4G4t0WhiXQxsmxBoVThpD1mASru6gXV/Zxrtt80kgaKnZ/NeTU8FN9Ccqn2jxHaBXFYGFrKkzTwDxbQ0yujreBGvqg/lmD6KRPhA4iATWWlstHXJ7m1fyVqYCN/HAGe5NznwtQRMI8rymj0OfI5DzZViwfyncbZPCxQjIw6U7w5OORCtnZfkk3tLVFNMGJHdcZPxVgeDJYhI6z87uA1QzQKRZL0aBpiE4PmS2JdRZbLLBIbVTHtKKT2fUw4uUWl7hed2GAB8jCOzn
+- name: malory
+  groups: worthnews
+  ssh_authorized_keys:
+  - ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABAQCqj197MskIdh3TDlk31dJMeYSCCUh4YRoRs5/H0VApr8jku5CHNCzborn0qg8zoT9YO99BSYPcmcHKAlJMHW4i+AHtfa08D6uLHrAVpEyrJt94p4nBUH+bbkDVKBEbUk/EKyJqUYDwhSn5CxgdsJTswvHuFhPNKlFlZmWgQkzqRLQ6Py3dmA1t8MUTu/ZUXfYO150ZZKXhT2dZ6WWHnqHqURHnCqGc2KS17BixiEWIqYG482GNtJTUthLnY4Yehbgs9C5dxaN7D3AP2H5IFUheQrYQvX/lD0DSzsfFsKtpLOKDwOTXqB9xv4U8XDpJz2sV0DFqm3DfssXFiXl8Sn7/
+- name: bobby
+  groups: worthweb,worthnews,worthpeople
+  ssh_authorized_keys:
+  - ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABAQCaoXKxJXcHpxPj6GqyB1n9dRgxN7Re+2+nwiQcMWmcNTy5d5d9grFpdApZpRAeemvrr+qEgT9NOkUTh5mwzcBcDgScrjHXPAsFSBvbkpclaZKlkEP+rAARp29SNWxITb3bT1itiikHzSyjpjgC5vdNrECQGEbVBulx/3/XBe2JyOHxmn8w3041ci4MokVCC35OFZStlvigdopu5j0RLy1YhFceePJj3X+F8r0PJfD8FXbU8CoelzEb3WUu1R1IZyqnTwo03SAbXqR15W4t56hYjyCkidQvR5pTc9mnLHCnVFj8lJG6JSGawJZSGrnttrPEMHhSWHpyL4XbEpUJ6k/p
+- name: charlie
+  groups: worthpeople
+  ssh_authorized_keys:
+  - ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABAQDBQzSsFCUkEacdhHDepcmQjmv8y/8sNRcTIw0xgjtBm3qUlpLGHB9S+S4vJTHhs9yy5Uhm+jZqxb//Ym7USJJUedGe31MQDCh1dQoOasVun7+7a9bb1OBY0rUOau8J3sGFuQns4xTmE8ne6pC4iSgUTK2jzXrhET4UHZaA3aHuQx3pTOddI5sxEoFa7vEP/ek+hxYtL5WTOxeGklhwnfbL2tOx5/vtgdp1OcPjZSTRaHukhNR+JyzyD5Q811J21yRhrGHvkcOHJfRjtncigg1iCK7CHAkTxi2vgY7wg+88UxpIjRTMO3sUhx6F78hU97LdCfa0qmt9tnxeQzNHjD5f
+runcmd:
+- 'groupmod -g 2000 worthweb'
+- 'groupmod -g 2001 worthnews'
+- 'groupmod -g 2002 worthpeople'
+- rm -rf /var/www/html
+- 'echo "${file_system_id}:/    /data/efs-mount-point   efs    _netdev,noresvport,tls,iam 0 0" >> /etc/fstab'
+- mkdir -p /data/efs-mount-point
+- mount -a
+- ln -s -T /data/efs-mount-point/html /var/www/html
+- touch /var/www/html/test.html
+- 'echo "ErrorDocument 404 /missing.html" >> /etc/httpd/conf/httpd.conf'
+- service httpd start
+- chkconfig httpd on
