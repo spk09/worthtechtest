@@ -3,3 +3,6 @@
 terraform.tfstate
 terraform.tfvars
 *.tfstate*
+
+# tf lock file
+.terraform.lock.hcl
